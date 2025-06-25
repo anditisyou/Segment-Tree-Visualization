@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Segment Tree Visualizer</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -38,6 +36,12 @@
             stroke-width: 2px;
             filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.5));
         }
+        .node.highlight-lazy-propagate {
+            fill: #a78bfa; /* Light purple for lazy propagation */
+            stroke: #7c3aed;
+            stroke-width: 2px;
+            filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.5));
+        }
         .node.highlight-current {
             fill: #bfdbfe;
             stroke: #2563eb;
@@ -59,7 +63,8 @@
         .node.highlight-query .node-text,
         .node.highlight-update .node-text,
         .node.highlight-current .node-text,
-        .node.highlight-leaf .node-text {
+        .node.highlight-leaf .node-text,
+        .node.highlight-lazy-propagate .node-text {
             fill: #ffffff; /* Keep white text on all highlighted nodes */
         }
         .node-text.text-xs {
@@ -207,7 +212,6 @@
             </div>
         </div>
 
-        <!-- Tabs Navigation -->
         <div class="flex border-b border-gray-200 mb-6">
             <button class="tab-button px-4 py-2 font-medium rounded-t-lg border-b-2 border-transparent active" data-tab="build">
                 <i class="fas fa-tree mr-2"></i>Build Tree
@@ -223,7 +227,6 @@
             </button>
         </div>
 
-        <!-- Tab Contents -->
         <div class="tab-content active" id="build-tab">
             <div class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <h2 class="text-xl font-semibold text-blue-600 mb-3">
@@ -255,7 +258,7 @@
                             <option value="sum">Sum</option>
                             <option value="min">Minimum</option>
                             <option value="max">Maximum</option>
-                            <option value="product">Product</option> <!-- Added Product option -->
+                            <option value="product">Product</option>
                         </select>
                     </div>
                 </div>
@@ -313,11 +316,11 @@
         <div class="tab-content" id="update-tab">
             <div class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <h2 class="text-xl font-semibold text-yellow-600 mb-3">
-                    <i class="fas fa-edit mr-2"></i>Update Value
+                    <i class="fas fa-edit mr-2"></i>Update Value / Range
                 </h2>
                 <div class="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-4">
                     <div class="flex items-center space-x-2">
-                        <label for="updateIndex" class="text-sm font-medium text-gray-700">Index:</label>
+                        <label for="updateIndex" class="text-sm font-medium text-gray-700">Index (Point Update):</label>
                         <input type="number" id="updateIndex" value="1" min="0"
                                class="w-16 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
                     </div>
@@ -326,12 +329,41 @@
                         <input type="number" id="updateValue" value="10"
                                class="w-16 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
                     </div>
-                    <button id="updateBtn"
+                    <button id="pointUpdateBtn"
                             class="px-5 py-2 bg-yellow-600 text-white font-semibold rounded-md shadow-md
                                    hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2
                                    transition-colors duration-200">
-                        <i class="fas fa-sync-alt mr-1"></i>Update Value
+                        <i class="fas fa-sync-alt mr-1"></i>Point Update
                     </button>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold text-purple-600 mb-3">
+                        <i class="fas fa-layer-group mr-2"></i>Lazy Propagation (Range Update)
+                    </h3>
+                    <div class="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <label for="rangeUpdateStart" class="text-sm font-medium text-gray-700">Start Index:</label>
+                            <input type="number" id="rangeUpdateStart" value="1" min="0"
+                                   class="w-16 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="rangeUpdateEnd" class="text-sm font-medium text-gray-700">End Index:</label>
+                            <input type="number" id="rangeUpdateEnd" value="3" min="0"
+                                   class="w-16 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label for="rangeUpdateValue" class="text-sm font-medium text-gray-700">Add Value:</label>
+                            <input type="number" id="rangeUpdateValue" value="5"
+                                   class="w-16 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <button id="rangeUpdateBtn"
+                                class="px-5 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md
+                                       hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                                       transition-colors duration-200">
+                            <i class="fas fa-arrows-alt-h mr-1"></i>Range Update
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -361,10 +393,8 @@
             </div>
         </div>
 
-        <!-- Message Box -->
         <div id="messageBox" class="message-box hidden"></div>
 
-        <!-- Visualization Area -->
         <div class="bg-gray-50 p-4 rounded-lg shadow-inner mt-6">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xl font-semibold text-gray-700">
@@ -388,7 +418,6 @@
         </div>
     </div>
 
-    <!-- Help Modal -->
     <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -408,11 +437,22 @@
                     </p>
                 </div>
                 <div>
+                    <h4 class="font-bold text-lg text-blue-600 mb-2">What is Lazy Propagation?</h4>
+                    <p class="text-gray-700">
+                        Lazy propagation is an optimization technique for segment trees that allows for efficient 
+                        <strong>range updates</strong> (e.g., adding a value to all elements within a range). 
+                        Instead of updating all individual leaf nodes in the range, it "lazily" marks internal 
+                        nodes with pending updates and pushes these updates down to children only when necessary 
+                        (i.e., when querying or updating a segment that overlaps with the lazy node's range).
+                    </p>
+                </div>
+                <div>
                     <h4 class="font-bold text-lg text-blue-600 mb-2">How to Use This Visualizer</h4>
                     <ol class="list-decimal list-inside space-y-2 text-gray-700">
                         <li><strong>Build Tree:</strong> Enter an array of numbers (comma-separated) and click "Build Tree"</li>
                         <li><strong>Range Query:</strong> Enter a start and end index to query the sum/min/max/product in that range</li>
-                        <li><strong>Update Value:</strong> Change a value at a specific index and see the tree update</li>
+                        <li><strong>Point Update:</strong> Change a value at a specific index and see the tree update</li>
+                        <li><strong>Range Update (Lazy):</strong> Add a value to all elements in a given range using lazy propagation.</li>
                         <li><strong>Step-by-Step:</strong> Use the step-by-step mode to see how queries and updates work</li>
                         <li><strong>Node Details:</strong> Click on any node to see its details</li>
                     </ol>
@@ -423,7 +463,8 @@
                         <li><kbd>Space</kbd>: Next step (in step-by-step mode)</li>
                         <li><kbd>B</kbd>: Build tree</li>
                         <li><kbd>Q</kbd>: Run query</li>
-                        <li><kbd>U</kbd>: Update value</li>
+                        <li><kbd>U</kbd>: Perform Point Update</li>
+                        <li><kbd>R</kbd>: Perform Range Update (Lazy)</li>
                     </ul>
                 </div>
             </div>
@@ -442,6 +483,8 @@
                 this.n = arr.length;
                 // The segment tree array, size 4*n is typical for safety.
                 this.seg = new Array(4 * this.n).fill(0);
+                // Lazy array to store pending updates.
+                this.lazy = new Array(4 * this.n).fill(0); 
                 // Stores additional information for visualization (e.g., node range, position).
                 this.nodeInfo = {}; 
                 this.operation = operation;
@@ -458,7 +501,7 @@
              */
             build(index, low, high, arr) {
                 // Store range information for visualization purposes.
-                this.nodeInfo[index] = { low, high, value: null };
+                this.nodeInfo[index] = { low, high, value: null, lazyValue: 0 };
 
                 // Base case: If it's a leaf node.
                 if (low === high) {
@@ -474,79 +517,86 @@
                 this.build(2 * index + 2, mid + 1, high, arr); // Build right child
 
                 // Combine results from children based on the selected operation.
-                switch (this.operation) {
-                    case 'sum':
-                        this.seg[index] = this.seg[2 * index + 1] + this.seg[2 * index + 2];
-                        break;
-                    case 'min':
-                        this.seg[index] = Math.min(this.seg[2 * index + 1], this.seg[2 * index + 2]);
-                        break;
-                    case 'max':
-                        this.seg[index] = Math.max(this.seg[2 * index + 1], this.seg[2 * index + 2]);
-                        break;
-                    case 'product': // New product operation
-                        this.seg[index] = this.seg[2 * index + 1] * this.seg[2 * index + 2];
-                        break;
-                    default:
-                        // Default to sum if an invalid operation is provided.
-                        this.seg[index] = this.seg[2 * index + 1] + this.seg[2 * index + 2];
-                }
+                this.seg[index] = this._combine(this.seg[2 * index + 1], this.seg[2 * index + 2]);
                 // Store the combined value for visualization.
                 this.nodeInfo[index].value = this.seg[index];
             }
 
             /**
-             * Public wrapper for performing a range query.
-             * @param {number} l The left boundary of the query range (inclusive).
-             * @param {number} r The right boundary of the query range (inclusive).
-             * @returns {{result: number, path: Array<number>}} The query result and the path of visited nodes.
-             */
-            queryRange(l, r) {
-                const path = []; // To store the path of nodes visited during the query.
-                const result = this._queryRecursive(0, 0, this.n - 1, l, r, path);
-                return { result, path };
-            }
-
-            /**
-             * Recursive function to perform a range query.
+             * Pushes pending lazy updates down to children.
+             * This function should be called before accessing or recursing into children.
              * @param {number} index The current node's index.
              * @param {number} low The lower bound of the current segment.
              * @param {number} high The upper bound of the current segment.
-             * @param {number} l The left boundary of the query range.
-             * @param {number} r The right boundary of the query range.
-             * @param {Array<number>} path The array to record the path of visited nodes.
-             * @returns {number} The result of the query for the given range.
+             * @param {Array<number>} path The array to record the path of visited nodes for visualization.
+             * @param {string} operationType Type of operation for visualization.
              */
-            _queryRecursive(index, low, high, l, r, path) {
-                path.push(index); // Add current node to path for highlighting.
+            push(index, low, high, path = [], operationType = '') {
+                if (this.lazy[index] !== 0) {
+                    // Apply lazy update to the current node's segment value.
+                    // This formula is specific to sum operations. For min/max/product, it would differ.
+                    // For min/max range updates, the lazy tag typically stores the value to *set* to,
+                    // not *add* to. For this visualizer, we assume sum for lazy propagation for simplicity.
+                    if (this.operation === 'sum') {
+                         this.seg[index] += (high - low + 1) * this.lazy[index];
+                    } else if (this.operation === 'min') {
+                        this.seg[index] = Math.min(this.seg[index], this.lazy[index]);
+                    } else if (this.operation === 'max') {
+                        this.seg[index] = Math.max(this.seg[index], this.lazy[index]);
+                    } else if (this.operation === 'product') {
+                        // Product updates are more complex with lazy propagation for range,
+                        // usually requiring exponentiation or different tag types.
+                        // For simplicity, we'll make product range updates a 'multiply by' scenario
+                        // and lazy tag stores the multiplier.
+                        // Here, we'll assume the provided lazy propagation is primarily for additive updates
+                        // like the C++ example, so we'll just handle sum gracefully.
+                        // For non-sum operations, a simple additive lazy won't work universally.
+                        // Let's adapt this to only allow additive lazy for sum, and
+                        // for others, it would require a different lazy tag mechanism.
+                        // For now, let's treat lazy propagation as an "add" operation.
+                        // If it's a product, this additive lazy doesn't make sense.
+                        // We will add a check in `updateRange` to only allow sum for lazy propagation.
+                    }
 
-                // Case 1: No overlap between current segment and query range.
-                if (r < low || high < l) {
-                    return this.getNeutralElement(); // Return identity element for the operation.
+                    this.nodeInfo[index].value = this.seg[index]; // Update visualized value
+
+                    // If not a leaf node, propagate lazy tag to children.
+                    if (low !== high) {
+                        if (this.operation === 'sum') {
+                            this.lazy[2 * index + 1] += this.lazy[index];
+                            this.lazy[2 * index + 2] += this.lazy[index];
+                        } else if (this.operation === 'min' || this.operation === 'max') {
+                            // For min/max, it's generally a "set" or "take min/max with" operation.
+                            // If lazy is 'add value', this would be:
+                            this.lazy[2 * index + 1] = this._combine(this.lazy[2 * index + 1], this.lazy[index]);
+                            this.lazy[2 * index + 2] = this._combine(this.lazy[2 * index + 2], this.lazy[index]);
+                        }
+                        this.nodeInfo[2 * index + 1].lazyValue += this.lazy[index]; // For visualization
+                        this.nodeInfo[2 * index + 2].lazyValue += this.lazy[index]; // For visualization
+                    }
+                    this.lazy[index] = 0; // Clear lazy tag for current node.
+                    this.nodeInfo[index].lazyValue = 0; // For visualization
                 }
+            }
 
-                // Case 2: Complete overlap between current segment and query range.
-                if (l <= low && high <= r) {
-                    return this.seg[index]; // Return the segment tree node's value.
-                }
-
-                // Case 3: Partial overlap. Recurse on children.
-                const mid = Math.floor((low + high) / 2);
-                const leftResult = this._queryRecursive(2 * index + 1, low, mid, l, r, path);
-                const rightResult = this._queryRecursive(2 * index + 2, mid + 1, high, l, r, path);
-
-                // Combine results from children based on the operation.
+            /**
+             * Combines results from two children based on the selected operation.
+             * @param {number} val1 Value from left child.
+             * @param {number} val2 Value from right child.
+             * @returns {number} Combined value.
+             */
+            _combine(val1, val2) {
                 switch (this.operation) {
                     case 'sum':
-                        return leftResult + rightResult;
+                        return val1 + val2;
                     case 'min':
-                        return Math.min(leftResult, rightResult);
+                        return Math.min(val1, val2);
                     case 'max':
-                        return Math.max(leftResult, rightResult);
-                    case 'product': // New product operation combination
-                        return leftResult * rightResult;
+                        return Math.max(val1, val2);
+                    case 'product':
+                        return val1 * val2;
                     default:
-                        return leftResult + rightResult;
+                        return val1 + val2;
                 }
             }
 
@@ -563,11 +613,62 @@
                         return Infinity; // min(Infinity, x) = x.
                     case 'max':
                         return -Infinity; // max(-Infinity, x) = x.
-                    case 'product': // New product operation neutral element
+                    case 'product':
                         return 1; // Multiplying by 1 does not change the product.
                     default:
                         return 0;
                 }
+            }
+
+            /**
+             * Public wrapper for performing a range query.
+             * @param {number} l The left boundary of the query range (inclusive).
+             * @param {number} r The right boundary of the query range (inclusive).
+             * @returns {{result: number, path: Array<number>, lazyPropagated: Array<number>}} The query result and the path of visited nodes, and nodes where lazy propagation occurred.
+             */
+            queryRange(l, r) {
+                const path = []; 
+                const lazyPropagated = [];
+                const result = this._queryRecursive(0, 0, this.n - 1, l, r, path, lazyPropagated);
+                return { result, path, lazyPropagated };
+            }
+
+            /**
+             * Recursive function to perform a range query with lazy propagation.
+             * @param {number} index The current node's index.
+             * @param {number} low The lower bound of the current segment.
+             * @param {number} high The upper bound of the current segment.
+             * @param {number} l The left boundary of the query range.
+             * @param {number} r The right boundary of the query range.
+             * @param {Array<number>} path The array to record the path of visited nodes.
+             * @param {Array<number>} lazyPropagated The array to record nodes where lazy propagation occurred.
+             * @returns {number} The result of the query for the given range.
+             */
+            _queryRecursive(index, low, high, l, r, path, lazyPropagated) {
+                path.push(index); 
+
+                // Push down any pending lazy updates before processing this node.
+                if (this.lazy[index] !== 0) {
+                    lazyPropagated.push(index);
+                    this.push(index, low, high);
+                }
+
+                // Case 1: No overlap.
+                if (r < low || high < l) {
+                    return this.getNeutralElement();
+                }
+
+                // Case 2: Complete overlap.
+                if (l <= low && high <= r) {
+                    return this.seg[index];
+                }
+
+                // Case 3: Partial overlap. Recurse on children.
+                const mid = Math.floor((low + high) / 2);
+                const leftResult = this._queryRecursive(2 * index + 1, low, mid, l, r, path, lazyPropagated);
+                const rightResult = this._queryRecursive(2 * index + 2, mid + 1, high, l, r, path, lazyPropagated);
+
+                return this._combine(leftResult, rightResult);
             }
 
             /**
@@ -580,7 +681,8 @@
                 const steps = [];
                 const finalResult = this._queryRecursiveStepByStep(0, 0, this.n - 1, l, r, [], steps);
                 steps.push({
-                    highlightPath: [], // Clear highlights for final step message.
+                    highlightPath: [], 
+                    lazyPropagated: [],
                     currentStepNode: null,
                     message: `Query complete! Final ${this.getOperationName()} for range [${l}, ${r}] is: ${finalResult}.`
                 });
@@ -588,7 +690,7 @@
             }
 
             /**
-             * Recursive helper for step-by-step query visualization.
+             * Recursive helper for step-by-step query visualization with lazy propagation.
              * Records each step, including node highlights and messages.
              * @param {number} index The current node's index.
              * @param {number} low The lower bound of the current segment.
@@ -600,25 +702,37 @@
              * @returns {number} The result of the query for the given range.
              */
             _queryRecursiveStepByStep(index, low, high, l, r, currentCallPath, steps) {
-                // Clone currentCallPath to capture state for this step's highlight.
                 const pathForStep = [...currentCallPath, index];
-                
-                let result = this.getNeutralElement();
-                let message = `Visiting node: idx:${index} ([${low}-${high}]) for query range [${l}, ${r}].`;
+                let lazyPropagatedForStep = [];
 
-                // Add initial state of this call.
+                let message = `Visiting node: idx:${index} ([${low}-${high}]) for query range [${l}, ${r}].`;
                 steps.push({
                     highlightPath: pathForStep,
                     currentStepNode: index,
+                    lazyPropagated: [],
                     message: message
                 });
 
+                // Push down lazy updates *before* checking for overlaps.
+                if (this.lazy[index] !== 0) {
+                    lazyPropagatedForStep.push(index);
+                    message = `Node idx:${index} ([${low}-${high}]) has lazy value (${this.lazy[index]}). Pushing down.`;
+                    steps.push({
+                        highlightPath: pathForStep,
+                        currentStepNode: index,
+                        lazyPropagated: lazyPropagatedForStep,
+                        message: message
+                    });
+                    this.push(index, low, high);
+                }
+                
                 // Case 1: No overlap.
                 if (r < low || high < l) {
                     message = `Node idx:${index} ([${low}-${high}]) has NO OVERLAP with query [${l}, ${r}]. Returning ${this.getNeutralElement()}.`;
                     steps.push({
                         highlightPath: pathForStep,
                         currentStepNode: index,
+                        lazyPropagated: lazyPropagatedForStep,
                         message: message
                     });
                     return this.getNeutralElement();
@@ -626,11 +740,12 @@
 
                 // Case 2: Complete overlap.
                 if (l <= low && high <= r) {
-                    result = this.seg[index];
+                    const result = this.seg[index];
                     message = `Node idx:${index} ([${low}-${high}]) has COMPLETE OVERLAP with query [${l}, ${r}]. Using its value (${result}).`;
                     steps.push({
                         highlightPath: pathForStep,
                         currentStepNode: index,
+                        lazyPropagated: lazyPropagatedForStep,
                         message: message
                     });
                     return result;
@@ -643,6 +758,7 @@
                 steps.push({
                     highlightPath: pathForStep,
                     currentStepNode: index,
+                    lazyPropagated: lazyPropagatedForStep,
                     message: message
                 });
                 const leftResult = this._queryRecursiveStepByStep(2 * index + 1, low, mid, l, r, pathForStep, steps);
@@ -651,36 +767,17 @@
                 steps.push({
                     highlightPath: pathForStep,
                     currentStepNode: index,
+                    lazyPropagated: lazyPropagatedForStep,
                     message: message
                 });
                 const rightResult = this._queryRecursiveStepByStep(2 * index + 2, mid + 1, high, l, r, pathForStep, steps);
                 
-                // Combine results based on operation.
-                switch (this.operation) {
-                    case 'sum':
-                        result = leftResult + rightResult;
-                        message = `Back at node idx:${index}. Summing results: ${leftResult} + ${rightResult} = ${result}.`;
-                        break;
-                    case 'min':
-                        result = Math.min(leftResult, rightResult);
-                        message = `Back at node idx:${index}. Finding min: min(${leftResult}, ${rightResult}) = ${result}.`;
-                        break;
-                    case 'max':
-                        result = Math.max(leftResult, rightResult);
-                        message = `Back at node idx:${index}. Finding max: max(${leftResult}, ${rightResult}) = ${result}.`;
-                        break;
-                    case 'product': // New product operation combination for step-by-step
-                        result = leftResult * rightResult;
-                        message = `Back at node idx:${index}. Multiplying results: ${leftResult} * ${rightResult} = ${result}.`;
-                        break;
-                    default:
-                        result = leftResult + rightResult;
-                        message = `Back at node idx:${index}. Summing results: ${leftResult} + ${rightResult} = ${result}.`;
-                }
-                
+                const result = this._combine(leftResult, rightResult);
+                message = `Back at node idx:${index}. Combining results: ${leftResult} and ${rightResult} = ${result}.`;
                 steps.push({
                     highlightPath: pathForStep,
                     currentStepNode: index,
+                    lazyPropagated: lazyPropagatedForStep,
                     message: message
                 });
                 return result;
@@ -695,25 +792,25 @@
                     case 'sum': return 'sum';
                     case 'min': return 'minimum';
                     case 'max': return 'maximum';
-                    case 'product': return 'product'; // New product operation name
+                    case 'product': return 'product'; 
                     default: return 'sum';
                 }
             }
 
             /**
-             * Public wrapper for updating a value at a specific position.
+             * Public wrapper for point updating a value at a specific position.
              * @param {number} pos The index in the original array to update.
              * @param {number} newVal The new value for the position.
              * @returns {{path: Array<number>}} The path of nodes visited during the update.
              */
-            updateValue(pos, newVal) {
-                const path = []; // To store visited nodes for visualization.
-                this._updateRecursive(0, 0, this.n - 1, pos, newVal, path);
+            pointUpdate(pos, newVal) {
+                const path = []; 
+                this._pointUpdateRecursive(0, 0, this.n - 1, pos, newVal, path);
                 return { path };
             }
 
             /**
-             * Recursive function to update a value in the segment tree.
+             * Recursive function to update a single value in the segment tree.
              * @param {number} index The current node's index.
              * @param {number} low The lower bound of the current segment.
              * @param {number} high The upper bound of the current segment.
@@ -721,42 +818,92 @@
              * @param {number} newVal The new value.
              * @param {Array<number>} path The array to record the path of visited nodes.
              */
-            _updateRecursive(index, low, high, pos, newVal, path) {
-                path.push(index); // Add current node to path.
+            _pointUpdateRecursive(index, low, high, pos, newVal, path) {
+                path.push(index); 
+
+                // If this node has a lazy tag, push it down before updating.
+                if (this.lazy[index] !== 0) {
+                    this.push(index, low, high);
+                }
 
                 // Base case: If it's the leaf node corresponding to the update position.
                 if (low === high) {
                     this.seg[index] = newVal;
-                    this.nodeInfo[index].value = newVal; // Update node info for visualization.
+                    this.nodeInfo[index].value = newVal; 
                     return;
                 }
 
                 // Recursive step: Traverse down to the correct child.
                 const mid = Math.floor((low + high) / 2);
                 if (pos <= mid) {
-                    this._updateRecursive(2 * index + 1, low, mid, pos, newVal, path);
+                    this._pointUpdateRecursive(2 * index + 1, low, mid, pos, newVal, path);
                 } else {
-                    this._updateRecursive(2 * index + 2, mid + 1, high, pos, newVal, path);
+                    this._pointUpdateRecursive(2 * index + 2, mid + 1, high, pos, newVal, path);
                 }
 
                 // After children are updated, update the current node's value.
-                switch (this.operation) {
-                    case 'sum':
-                        this.seg[index] = this.seg[2 * index + 1] + this.seg[2 * index + 2];
-                        break;
-                    case 'min':
-                        this.seg[index] = Math.min(this.seg[2 * index + 1], this.seg[2 * index + 2]);
-                        break;
-                    case 'max':
-                        this.seg[index] = Math.max(this.seg[2 * index + 1], this.seg[2 * index + 2]);
-                        break;
-                    case 'product': // New product operation for update
-                        this.seg[index] = this.seg[2 * index + 1] * this.seg[2 * index + 2];
-                        break;
-                    default:
-                        this.seg[index] = this.seg[2 * index + 1] + this.seg[2 * index + 2];
+                this.seg[index] = this._combine(this.seg[2 * index + 1], this.seg[2 * index + 2]);
+                this.nodeInfo[index].value = this.seg[index]; 
+            }
+
+            /**
+             * Public wrapper for performing a range update with lazy propagation.
+             * @param {number} l The left boundary of the update range (inclusive).
+             * @param {number} r The right boundary of the update range (inclusive).
+             * @param {number} val The value to add to the elements in the range.
+             * @returns {{path: Array<number>, lazyPropagated: Array<number>}} The path of visited nodes and nodes where lazy propagation occurred.
+             */
+            rangeUpdate(l, r, val) {
+                const path = [];
+                const lazyPropagated = [];
+                this._rangeUpdateRecursive(0, 0, this.n - 1, l, r, val, path, lazyPropagated);
+                return { path, lazyPropagated };
+            }
+
+            /**
+             * Recursive function to perform a range update with lazy propagation.
+             * Only supports 'sum' operation for lazy propagation in this visualizer.
+             * @param {number} index The current node's index.
+             * @param {number} low The lower bound of the current segment.
+             * @param {number} high The upper bound of the current segment.
+             * @param {number} l The left boundary of the update range.
+             * @param {number} r The right boundary of the update range.
+             * @param {number} val The value to add.
+             * @param {Array<number>} path The array to record the path of visited nodes.
+             * @param {Array<number>} lazyPropagated The array to record nodes where lazy propagation occurred.
+             */
+            _rangeUpdateRecursive(index, low, high, l, r, val, path, lazyPropagated) {
+                path.push(index);
+
+                // Push down any pending lazy updates for this node.
+                if (this.lazy[index] !== 0) {
+                    lazyPropagated.push(index);
+                    this.push(index, low, high);
                 }
-                this.nodeInfo[index].value = this.seg[index]; // Update node info for visualization.
+
+                // Case 1: No overlap.
+                if (r < low || high < l) {
+                    return;
+                }
+
+                // Case 2: Complete overlap.
+                if (l <= low && high <= r) {
+                    // Apply update directly to current node's lazy tag.
+                    this.lazy[index] += val;
+                    lazyPropagated.push(index); // Mark this node as having received a lazy update.
+                    // Apply the lazy update to the current node's segment value immediately.
+                    this.push(index, low, high);
+                    return;
+                }
+
+                // Case 3: Partial overlap. Recurse on children.
+                const mid = Math.floor((low + high) / 2);
+                this._rangeUpdateRecursive(2 * index + 1, low, mid, l, r, val, path, lazyPropagated);
+                this._rangeUpdateRecursive(2 * index + 2, mid + 1, high, l, r, val, path, lazyPropagated);
+
+                // After children are updated, re-calculate current node's value from children.
+                this.seg[index] = this._combine(this.seg[2 * index + 1], this.seg[2 * index + 2]);
+                this.nodeInfo[index].value = this.seg[index];
             }
         }
 
@@ -782,8 +929,8 @@
          */
         function clearVisualization() {
             vizContainer.innerHTML = '<p>Build a tree to see the visualization here.</p>';
-            vizContainer.style.overflowX = 'hidden'; // Hide scrollbar when empty.
-            hideStepControls(); // Hide step-by-step controls.
+            vizContainer.style.overflowX = 'hidden'; 
+            hideStepControls(); 
             nodeDetails.innerHTML = '<p class="text-gray-500">Click on any node in the tree to view its details here.</p>';
         }
 
@@ -794,21 +941,18 @@
          */
         function showMessage(message, type = 'info') {
             messageBox.textContent = message;
-            messageBox.className = 'message-box'; // Reset classes.
-            messageBox.classList.add(type); // Add type-specific styling.
-            messageBox.classList.remove('hidden'); // Make message box visible.
+            messageBox.className = 'message-box'; 
+            messageBox.classList.add(type); 
+            messageBox.classList.remove('hidden'); 
             
-            // Add to operation log with timestamp.
             const now = new Date();
             const timeString = now.toLocaleTimeString();
             const logEntry = document.createElement('p');
             logEntry.innerHTML = `<span class="text-gray-500">[${timeString}]</span> <span class="${type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600'}">${message}</span>`;
-            operationLog.prepend(logEntry); // Add to the top of the log.
+            operationLog.prepend(logEntry); 
             
-            // Auto-scroll to top of log.
             operationLog.scrollTop = 0;
             
-            // Auto-hide message after 5 seconds (unless it's an error, errors persist).
             if (type !== 'error') {
                 setTimeout(() => {
                     messageBox.classList.add('hidden');
@@ -828,7 +972,7 @@
          */
         function showStepControls() {
             document.getElementById('stepControls').classList.remove('hidden');
-            updateProgressBar(); // Initialize progress bar.
+            updateProgressBar(); 
         }
 
         /**
@@ -855,56 +999,45 @@
          * Draws the segment tree visualization in the SVG container.
          * @param {SegmentTree} segmentTreeInstance The SegmentTree object to visualize.
          * @param {Array<number>} highlightPath An array of node indices to highlight.
-         * @param {string} operationType The type of operation ('query' or 'update') for specific highlighting.
+         * @param {string} operationType The type of operation ('query', 'pointUpdate', 'rangeUpdate') for specific highlighting.
          * @param {number|null} currentStepNode The index of the node currently being processed in step-by-step mode.
+         * @param {Array<number>} lazyPropagatedNodes An array of node indices where lazy propagation occurred.
          */
-        function drawTree(segmentTreeInstance, highlightPath = [], operationType = '', currentStepNode = null) {
+        function drawTree(segmentTreeInstance, highlightPath = [], operationType = '', currentStepNode = null, lazyPropagatedNodes = []) {
             if (!segmentTreeInstance || !segmentTreeInstance.n) {
                 clearVisualization();
                 return;
             }
 
-            hideMessage(); // Hide any existing messages.
+            hideMessage(); 
 
             const nodeInfo = segmentTreeInstance.nodeInfo;
             const n = segmentTreeInstance.n;
 
-            // Define node and spacing parameters for layout.
             const nodeRadius = 25;
             const verticalSpacing = 70;
 
-            // Calculate tree dimensions dynamically.
             const treeHeight = Math.ceil(Math.log2(n + 1));
             const maxLeaves = Math.pow(2, treeHeight - 1);
 
-            // Calculate SVG width based on the widest level (leaves).
             const minRequiredWidth = maxLeaves * (nodeRadius * 2 + 20);
             const svgWidth = Math.max(minRequiredWidth, vizContainer.clientWidth);
 
             const svgHeight = treeHeight * verticalSpacing + 2 * nodeRadius + 20;
 
-            // Create SVG element.
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("width", svgWidth);
             svg.setAttribute("height", svgHeight);
             svg.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
             svg.style.backgroundColor = '#fff';
             svg.style.borderRadius = '0.375rem';
-            // Apply zoom transform.
             svg.style.transform = `scale(${currentScale})`;
             svg.style.transformOrigin = 'top left';
 
-            /**
-             * Calculates the (x, y) position for a node.
-             * @param {number} index The node's index.
-             * @param {number} level The node's level in the tree.
-             * @returns {{x: number, y: number}} The coordinates.
-             */
             function getNodePosition(index, level) {
                 const nodesAtThisLevel = Math.pow(2, level);
                 const totalHorizontalRange = svgWidth - 2 * nodeRadius - 20;
                 const levelSpacing = totalHorizontalRange / (nodesAtThisLevel + 1);
-                // Position within its level, adjusting for 0-indexed nodes and 1-indexed formula.
                 const positionInLevel = index - (Math.pow(2, level) - 1); 
 
                 const nodeX = (positionInLevel + 1) * levelSpacing + nodeRadius + 10;
@@ -913,7 +1046,6 @@
                 return { x: nodeX, y: nodeY };
             }
 
-            // Pre-calculate and store positions for all nodes.
             for (let i = 0; i < segmentTreeInstance.seg.length; i++) {
                 if (nodeInfo[i]) {
                     const level = Math.floor(Math.log2(i + 1));
@@ -923,7 +1055,6 @@
                 }
             }
             
-            // Draw edges first to appear behind nodes.
             for (let i = 0; i < segmentTreeInstance.seg.length; i++) {
                 if (nodeInfo[i]) {
                     const parentX = nodeInfo[i].x;
@@ -932,7 +1063,6 @@
                     const leftChildIdx = 2 * i + 1;
                     const rightChildIdx = 2 * i + 2;
 
-                    // Draw left child edge if it exists.
                     if (nodeInfo[leftChildIdx]) {
                         const childX = nodeInfo[leftChildIdx].x;
                         const childY = nodeInfo[leftChildIdx].y;
@@ -944,7 +1074,6 @@
                         edge.setAttribute("y2", childY);
                         edge.setAttribute("class", "edge");
                         
-                        // Highlight edge if both parent and child are in the highlight path.
                         if (highlightPath.includes(i) && highlightPath.includes(leftChildIdx)) {
                             edge.classList.add("highlight");
                         }
@@ -952,7 +1081,6 @@
                         svg.appendChild(edge);
                     }
                     
-                    // Draw right child edge if it exists.
                     if (nodeInfo[rightChildIdx]) {
                         const childX = nodeInfo[rightChildIdx].x;
                         const childY = nodeInfo[rightChildIdx].y;
@@ -964,7 +1092,6 @@
                         edge.setAttribute("y2", childY);
                         edge.setAttribute("class", "edge");
                         
-                        // Highlight edge if both parent and child are in the highlight path.
                         if (highlightPath.includes(i) && highlightPath.includes(rightChildIdx)) {
                             edge.classList.add("highlight");
                         }
@@ -974,7 +1101,6 @@
                 }
             }
             
-            // Draw nodes on top of edges.
             for (let i = 0; i < segmentTreeInstance.seg.length; i++) {
                 if (nodeInfo[i]) {
                     const node = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -983,59 +1109,70 @@
                     node.setAttribute("r", nodeRadius);
                     node.setAttribute("class", "node");
                     
-                    // Apply highlight classes based on operation type and path.
                     if (highlightPath.includes(i)) {
                         if (operationType === 'query') {
                             node.classList.add("highlight-query");
-                        } else if (operationType === 'update') {
+                        } else if (operationType === 'pointUpdate') {
                             node.classList.add("highlight-update");
+                        } else if (operationType === 'rangeUpdate') {
+                             node.classList.add("highlight-update"); // Use update color for range update path
                         }
                     }
                     
-                    // Highlight the current node in step-by-step mode.
+                    if (lazyPropagatedNodes.includes(i)) {
+                        node.classList.add("highlight-lazy-propagate");
+                    }
+
                     if (i === currentStepNode) {
                         node.classList.add("highlight-current");
                     }
                     
-                    // Highlight leaf nodes with a distinct color.
                     if (nodeInfo[i].isLeaf) {
                         node.classList.add("highlight-leaf");
                     }
                     
-                    // Add click event listener to show node details.
                     node.addEventListener('click', () => showNodeDetails(i));
                     
                     svg.appendChild(node);
                     
-                    // Add node text (value)
                     const nodeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
                     nodeText.setAttribute("x", nodeInfo[i].x);
-                    nodeText.setAttribute("y", nodeInfo[i].y);
+                    nodeText.setAttribute("y", nodeInfo[i].y - 5); // Slightly above center for value
                     nodeText.setAttribute("text-anchor", "middle");
-                    nodeText.setAttribute("dy", "0.3em"); // Adjust vertical alignment.
+                    nodeText.setAttribute("dy", "0.3em");
                     nodeText.setAttribute("class", "node-text");
-                    nodeText.setAttribute("fill", "#ffffff"); // White text for better contrast.
+                    nodeText.setAttribute("fill", "#ffffff");
                     nodeText.setAttribute("font-weight", "bold");
                     nodeText.textContent = nodeInfo[i].value;
                     svg.appendChild(nodeText);
                     
-                    // Add range text below the node.
                     const rangeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
                     rangeText.setAttribute("x", nodeInfo[i].x);
                     rangeText.setAttribute("y", nodeInfo[i].y + nodeRadius + 12);
                     rangeText.setAttribute("text-anchor", "middle");
                     rangeText.setAttribute("class", "node-text");
-                    rangeText.setAttribute("fill", "#ffffff"); // White text for better contrast.
-                    rangeText.setAttribute("font-size", "10px"); // Smaller font size for range.
+                    rangeText.setAttribute("fill", "#ffffff");
+                    rangeText.setAttribute("font-size", "10px"); 
                     rangeText.textContent = `[${nodeInfo[i].low},${nodeInfo[i].high}]`;
                     svg.appendChild(rangeText);
+
+                    // Add lazy value text if non-zero
+                    if (segmentTreeInstance.lazy[i] !== 0) {
+                        const lazyText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        lazyText.setAttribute("x", nodeInfo[i].x);
+                        lazyText.setAttribute("y", nodeInfo[i].y + 10); // Below value, slightly adjusted
+                        lazyText.setAttribute("text-anchor", "middle");
+                        lazyText.setAttribute("class", "node-text text-xs");
+                        lazyText.setAttribute("fill", "#e5e7eb"); // Lighter color for lazy
+                        lazyText.textContent = `lazy: ${segmentTreeInstance.lazy[i]}`;
+                        svg.appendChild(lazyText);
+                    }
                 }
             }
             
-            // Clear any previous SVG and append the newly drawn tree.
             vizContainer.innerHTML = '';
             vizContainer.appendChild(svg);
-            vizContainer.style.overflowX = 'auto'; // Enable horizontal scroll if content overflows.
+            vizContainer.style.overflowX = 'auto'; 
         }
 
         /**
@@ -1049,6 +1186,7 @@
             }
             
             const node = currentSegmentTree.nodeInfo[nodeIndex];
+            const lazyVal = currentSegmentTree.lazy[nodeIndex];
             let details = `
                 <h3 class="font-bold text-lg mb-2">Node Details</h3>
                 <div class="grid grid-cols-2 gap-2 mb-3">
@@ -1056,10 +1194,10 @@
                     <div><span class="font-semibold">Range:</span> [${node.low}, ${node.high}]</div>
                     <div><span class="font-semibold">Value:</span> ${node.value}</div>
                     <div><span class="font-semibold">Type:</span> ${node.isLeaf ? 'Leaf' : 'Internal'}</div>
+                    <div><span class="font-semibold">Lazy Value:</span> ${lazyVal}</div>
                 </div>
             `;
             
-            // If it's not a leaf node, show its children's information.
             if (!node.isLeaf) {
                 const leftChild = 2 * nodeIndex + 1;
                 const rightChild = 2 * nodeIndex + 2;
@@ -1091,7 +1229,6 @@
             
             let array;
             try {
-                // Parse the comma-separated input string into an array of numbers.
                 array = arrayInput.split(',').map(num => {
                     const parsed = parseFloat(num.trim());
                     if (isNaN(parsed)) {
@@ -1104,7 +1241,6 @@
                     throw new Error('Array cannot be empty');
                 }
                 
-                // Warn for large arrays, as visualization might become cluttered.
                 if (array.length > 16) {
                     showMessage('For best visualization, please keep array size ≤ 16. Larger arrays will work but may not display well.', 'info');
                 }
@@ -1113,13 +1249,11 @@
                 return;
             }
             
-            // Create a new SegmentTree instance.
             currentSegmentTree = new SegmentTree(array, operation);
-            drawTree(currentSegmentTree); // Draw the newly built tree.
+            drawTree(currentSegmentTree); 
             
             showMessage(`Successfully built segment tree for array [${array.join(', ')}] with ${operation} operation.`, 'success');
             
-            // Enable query and update tabs after a tree is built.
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.disabled = false;
             });
@@ -1137,7 +1271,6 @@
             const start = parseInt(document.getElementById('queryStart').value);
             const end = parseInt(document.getElementById('queryEnd').value);
             
-            // Input validation for query range.
             if (isNaN(start) || isNaN(end)) {
                 showMessage('Please enter valid start and end indices.', 'error');
                 return;
@@ -1153,12 +1286,11 @@
                 return;
             }
             
-            // Perform the query.
-            const { result, path } = currentSegmentTree.queryRange(start, end);
-            drawTree(currentSegmentTree, path, 'query'); // Visualize the path taken.
+            const { result, path, lazyPropagated } = currentSegmentTree.queryRange(start, end);
+            drawTree(currentSegmentTree, path, 'query', null, lazyPropagated); 
             
             showMessage(`Range ${currentSegmentTree.getOperationName()} query for [${start}, ${end}] is: ${result}.`, 'success');
-            isStepByStepMode = false; // Ensure step-by-step mode is off.
+            isStepByStepMode = false; 
             hideStepControls();
         }
 
@@ -1174,7 +1306,6 @@
             const start = parseInt(document.getElementById('queryStart').value);
             const end = parseInt(document.getElementById('queryEnd').value);
             
-            // Input validation for query range.
             if (isNaN(start) || isNaN(end)) {
                 showMessage('Please enter valid start and end indices.', 'error');
                 return;
@@ -1191,14 +1322,13 @@
             }
             
             isStepByStepMode = true;
-            // Generate all steps for the query.
             const { steps, finalResult } = currentSegmentTree.generateQuerySteps(start, end);
             querySteps = steps;
             queryFinalResult = finalResult;
-            currentQueryStepIndex = -1; // Reset step index.
+            currentQueryStepIndex = -1; 
             
-            showStepControls(); // Display step controls.
-            nextQueryStep(); // Start the first step.
+            showStepControls(); 
+            nextQueryStep(); 
         }
 
         /**
@@ -1206,25 +1336,23 @@
          */
         function nextQueryStep() {
             if (!isStepByStepMode || currentQueryStepIndex >= querySteps.length - 1) {
-                // If not in step-by-step mode or all steps are completed.
                 return;
             }
             
             currentQueryStepIndex++;
             const step = querySteps[currentQueryStepIndex];
             
-            // Draw the tree with highlighting for the current step.
             drawTree(
                 currentSegmentTree, 
                 step.highlightPath, 
                 'query', 
-                step.currentStepNode
+                step.currentStepNode,
+                step.lazyPropagated // Pass lazy propagated nodes for highlighting
             );
             
             document.getElementById('stepMessage').textContent = step.message;
-            updateProgressBar(); // Update progress bar.
+            updateProgressBar(); 
             
-            // If it's the last step, show the final result message after a short delay.
             if (currentQueryStepIndex === querySteps.length - 1) {
                 setTimeout(() => {
                     showMessage(`Step-by-step query complete! Final ${currentSegmentTree.getOperationName()} for range [${document.getElementById('queryStart').value}, ${document.getElementById('queryEnd').value}] is: ${queryFinalResult}.`, 'success');
@@ -1233,9 +1361,9 @@
         }
 
         /**
-         * Updates a value in the segment tree and visualizes the update path.
+         * Performs a point update (single index) on the segment tree.
          */
-        function updateValue() {
+        function performPointUpdate() {
             if (!currentSegmentTree) {
                 showMessage('Please build a segment tree first.', 'error');
                 return;
@@ -1244,7 +1372,6 @@
             const index = parseInt(document.getElementById('updateIndex').value);
             const newValue = parseFloat(document.getElementById('updateValue').value);
             
-            // Input validation for update.
             if (isNaN(index) || index < 0 || index >= currentSegmentTree.n) {
                 showMessage(`Index must be between 0 and ${currentSegmentTree.n - 1}.`, 'error');
                 return;
@@ -1255,12 +1382,47 @@
                 return;
             }
             
-            // Perform the update.
-            const { path } = currentSegmentTree.updateValue(index, newValue);
-            drawTree(currentSegmentTree, path, 'update'); // Visualize the update path.
+            const { path } = currentSegmentTree.pointUpdate(index, newValue);
+            drawTree(currentSegmentTree, path, 'pointUpdate'); 
             
-            showMessage(`Updated value at index ${index} to ${newValue}.`, 'success');
-            isStepByStepMode = false; // Ensure step-by-step mode is off.
+            showMessage(`Point updated value at index ${index} to ${newValue}.`, 'success');
+            isStepByStepMode = false; 
+            hideStepControls();
+        }
+
+        /**
+         * Performs a range update with lazy propagation on the segment tree.
+         */
+        function performRangeUpdate() {
+            if (!currentSegmentTree) {
+                showMessage('Please build a segment tree first.', 'error');
+                return;
+            }
+            
+            if (currentSegmentTree.operation !== 'sum') {
+                showMessage('Lazy propagation for range updates is currently only supported for "Sum" operation.', 'error');
+                return;
+            }
+
+            const start = parseInt(document.getElementById('rangeUpdateStart').value);
+            const end = parseInt(document.getElementById('rangeUpdateEnd').value);
+            const valueToAdd = parseFloat(document.getElementById('rangeUpdateValue').value);
+
+            if (isNaN(start) || isNaN(end) || isNaN(valueToAdd)) {
+                showMessage('Please enter valid start index, end index, and value to add.', 'error');
+                return;
+            }
+
+            if (start < 0 || end >= currentSegmentTree.n || start > end) {
+                showMessage(`Invalid range: indices must be between 0 and ${currentSegmentTree.n - 1}, and start ≤ end.`, 'error');
+                return;
+            }
+
+            const { path, lazyPropagated } = currentSegmentTree.rangeUpdate(start, end, valueToAdd);
+            drawTree(currentSegmentTree, path, 'rangeUpdate', null, lazyPropagated);
+
+            showMessage(`Range updated: added ${valueToAdd} to elements from index ${start} to ${end}.`, 'success');
+            isStepByStepMode = false;
             hideStepControls();
         }
 
@@ -1268,8 +1430,8 @@
          * Generates a random array and populates the input field.
          */
         function generateRandomArray() {
-            const size = Math.floor(Math.random() * 8) + 4; // Generate array with 4-11 elements.
-            const array = Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1); // Random values 1-100.
+            const size = Math.floor(Math.random() * 8) + 4; 
+            const array = Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1); 
             document.getElementById('arrayInput').value = array.join(', ');
         }
 
@@ -1285,7 +1447,7 @@
          * Decreases the zoom level of the visualization.
          */
         function zoomOut() {
-            currentScale = Math.max(0.5, currentScale - zoomStep); // Prevent zooming out too much.
+            currentScale = Math.max(0.5, currentScale - zoomStep); 
             applyZoom();
         }
 
@@ -1312,22 +1474,18 @@
          * @param {string} tabId The ID of the tab to activate (e.g., 'build', 'query').
          */
         function switchTab(tabId) {
-            // Hide all tab content sections.
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
-            // Show the content for the selected tab.
             document.getElementById(`${tabId}-tab`).classList.add('active');
             
-            // Update button styles to reflect the active tab.
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
                 if (button.dataset.tab === tabId) {
                     button.classList.add('active');
                 }
             });
-            // When switching tabs, ensure step-by-step mode is reset if not on query tab
             if (tabId !== 'query') {
                 isStepByStepMode = false;
                 hideStepControls();
@@ -1338,60 +1496,56 @@
         document.getElementById('buildTreeBtn').addEventListener('click', buildTree);
         document.getElementById('queryBtn').addEventListener('click', runQuery);
         document.getElementById('queryStepBtn').addEventListener('click', runQueryStepByStep);
-        document.getElementById('updateBtn').addEventListener('click', updateValue);
+        document.getElementById('pointUpdateBtn').addEventListener('click', performPointUpdate); // Renamed for clarity
+        document.getElementById('rangeUpdateBtn').addEventListener('click', performRangeUpdate); // New button for range update
         document.getElementById('randomArrayBtn').addEventListener('click', generateRandomArray);
         document.getElementById('nextStepBtn').addEventListener('click', nextQueryStep);
         document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
         document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
         document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
 
-        // Tab switching functionality.
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
                 switchTab(button.dataset.tab);
             });
         });
 
-        // Help modal display.
         document.getElementById('helpBtn').addEventListener('click', () => {
             document.getElementById('helpModal').classList.remove('hidden');
         });
 
-        // Help modal close button.
         document.getElementById('closeHelpModal').addEventListener('click', () => {
             document.getElementById('helpModal').classList.add('hidden');
         });
 
-        // Global keyboard shortcuts.
         document.addEventListener('keydown', (e) => {
-            // Spacebar for next step in step-by-step mode.
             if (e.code === 'Space' && isStepByStepMode) {
-                e.preventDefault(); // Prevent default spacebar action (e.g., scrolling).
+                e.preventDefault(); 
                 nextQueryStep();
             }
             
-            // Ctrl + B for Build Tree.
             if (e.code === 'KeyB' && e.ctrlKey) {
                 e.preventDefault();
                 buildTree();
             }
             
-            // Ctrl + Q for Run Query.
             if (e.code === 'KeyQ' && e.ctrlKey) {
                 e.preventDefault();
                 runQuery();
             }
             
-            // Ctrl + U for Update Value.
-            if (e.code === 'KeyU' && e.ctrlKey) {
+            if (e.code === 'KeyU' && e.ctrlKey) { // For Point Update
                 e.preventDefault();
-                updateValue();
+                performPointUpdate();
+            }
+
+            if (e.code === 'KeyR' && e.ctrlKey) { // For Range Update
+                e.preventDefault();
+                performRangeUpdate();
             }
         });
 
-        // Initial UI setup on page load.
-        clearVisualization(); // Clear any default placeholder and ensure clean state.
-        // Disable query and update tabs until a tree is built.
+        clearVisualization(); 
         document.querySelectorAll('.tab-button').forEach(button => {
             if (button.dataset.tab !== 'build') {
                 button.disabled = true;
